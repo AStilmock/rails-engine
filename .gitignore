@@ -30,3 +30,4 @@
 
 # Ignore Coverage
 /coverage
+/config/application.yml
