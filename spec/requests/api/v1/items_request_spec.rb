@@ -169,4 +169,59 @@ RSpec.describe "Item API" do
       expect(@item[:unit_price]).to eq(200)
     end
   end
+
+  describe "delete an item path" do
+    before :each do
+      @merchant1 = Merchant.create!(name: "Baggins' Jewelry")
+      @merchant2 = Merchant.create!(name: "Tom's Tools")
+      @merchant3 = Merchant.create!(name: "Bill's Bikes")
+      @item1 = @merchant1.items.create!(name: "gold ring", description: "is precious", unit_price: 111)
+      @item2 = @merchant3.items.create!(name: "water bottle", description: "holds water", unit_price: 10) 
+      @item3 = @merchant3.items.create!(name: "water jug", description: "holds water", unit_price: 10)
+    end
+
+    it "request successful" do
+      delete "/api/v1/items/#{@item1.id}"
+      
+      expect(response.status).to eq(200)
+      expect(response.body).to be_a(String)
+    end
+
+    it "deletes item" do
+      expect(Item.count).to eq(3)
+      delete "/api/v1/items/#{@item1.id}"
+
+      expect(Item.count).to eq(2)
+      expect{Item.find(@item1.id)}.to raise_error(ActiveRecord::RecordNotFound)
+    end
+  end
+
+  describe "items merchant path" do
+    before :each do
+      @merchant1 = Merchant.create!(name: "Baggins' Jewelry")
+      @merchant2 = Merchant.create!(name: "Tom's Tools")
+      @merchant3 = Merchant.create!(name: "Bill's Bikes")
+      @item1 = @merchant1.items.create!(name: "gold ring", description: "is precious", unit_price: 111)
+      @item2 = @merchant3.items.create!(name: "water bottle", description: "holds water", unit_price: 10) 
+      @item3 = @merchant3.items.create!(name: "water jug", description: "holds water", unit_price: 10)
+    end
+
+    it "request successful" do
+      get "/api/v1/items/#{@item1.id}/merchant"
+      @data_parse = JSON.parse(response.body, symbolize_names: true)
+      @data = @data_parse[:data][:attributes]
+
+      expect(response.status).to eq(200)
+      expect(response.body).to be_a(String)
+      expect(@data).to be_a(Hash)
+    end
+
+    it "returns merchant data" do
+      get "/api/v1/items/#{@item1.id}/merchant"
+      @data_parse = JSON.parse(response.body, symbolize_names: true)
+      @data = @data_parse[:data][:attributes]
+
+      expect(@data[:name]).to eq(@merchant1.name)
+    end
+  end
 end
