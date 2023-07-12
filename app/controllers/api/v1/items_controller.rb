@@ -14,11 +14,19 @@ class Api::V1::ItemsController < ApplicationController
     end
   end
 
-  # def edit
-  # end
+  def update
+    # require 'pry'; binding.pry
+    @item = Item.find(params[:id].to_i)
+    if @item.update(item_params)
+      render json: ItemSerializer.new(@item)
+    end
+  end
 
-  # def delete
-  # end
+  def delete
+  end
+
+  def destroy
+  end
 
   private
 
