@@ -1,73 +1,105 @@
 require 'rails_helper'
 
 RSpec.describe "Merchant API" do
-  describe "all merchants route" do
+  describe "all merchants path" do 
     before :each do
-      get "/api/v1/merchants"
-      @merchant1 = Merchant.create!(name: "Schroeder-Jerde")
-      @merchants = JSON.parse(response.body)
-      @merch_response = File.read("./spec/fixtures/merchants_all.json")
-      @merch_parse = JSON.parse(@merch_response, symbolize_names: true)
+      @merchant1 = Merchant.create!(name: "Baggins' Jewelry")
+      @merchant2 = Merchant.create!(name: "Tom's Tools")
+      @merchant3 = Merchant.create!(name: "Bill's Bikes")
+      @item1 = @merchant1.items.create!(name: "gold ring", description: "is precious", unit_price: 111)
+      @item2 = @merchant3.items.create!(name: "water bottle", description: "holds water", unit_price: 10) 
+      @item3 = @merchant3.items.create!(name: "water jug", description: "holds water", unit_price: 10)
     end
 
     it "request successful" do
+      get "/api/v1/merchants"
+      @merchants_data = JSON.parse(response.body, symbolize_names: true)
+      @merchants = @merchants_data[:data]
+
       expect(response.status).to eq(200)
-      expect(response.body).to eq('{"data":[]}')
+      expect(@merchants).to be_an(Array)
+
+      @merchants.each do |merchant|
+        expect(merchant[:attributes]).to be_a(Hash)
+        expect(merchant[:attributes][:name]).to be_a(String)
+      end
     end
 
-    it "has content from serializer" do
-      expected = {
-        id: 1,
-        name: "Schroeder-Jerde",
-        created_at: "2012-03-27T14:53:59.000Z",
-        updated_at: "2012-03-27T14:53:59.000Z"
-      }
-      expect(@merch_parse.first).to eq(expected)
+    it "gets all merchants" do
+      get "/api/v1/merchants"
+      @merchants_data = JSON.parse(response.body, symbolize_names: true)
+      @merchants = @merchants_data[:data]
+
+      expect(@merchants.first[:attributes][:name]).to eq(@merchant1.name)
     end
   end
 
-  describe "single merchant route" do
+  describe "single merchant path" do
     before :each do
-      @merchant1 = Merchant.create!(name: "Schroeder-Jerde")
+      @merchant1 = Merchant.create!(name: "Baggins' Jewelry")
+      @merchant2 = Merchant.create!(name: "Tom's Tools")
+      @merchant3 = Merchant.create!(name: "Bill's Bikes")
+      @item1 = @merchant1.items.create!(name: "gold ring", description: "is precious", unit_price: 111)
+      @item2 = @merchant3.items.create!(name: "water bottle", description: "holds water", unit_price: 10) 
+      @item3 = @merchant3.items.create!(name: "water jug", description: "holds water", unit_price: 10)
+    end
+
+    it "request successful" do
       get "/api/v1/merchants/#{@merchant1.id}"
-      @merchants = JSON.parse(response.body)
-      @merch_response = File.read("./spec/fixtures/merchants_show.json")
-      @merch_parse = JSON.parse(@merch_response, symbolize_names: true)
+      @merchants_data = JSON.parse(response.body, symbolize_names: true)
+      @merchants = @merchants_data[:data]
+
+      expect(response.status).to eq(200)
+      expect(@merchants).to be_a(Hash)
     end
 
-    it "shows one merchant from serializer" do
-      expected = {
-        "data": {
-            "id": "1",
-            "type": "merchant",
-            "attributes": {
-                "name": "Schroeder-Jerde"
-            }
-        }
-      }
-      expect(@merch_parse).to eq(expected)
+    it "gets one merchant" do
+      get "/api/v1/merchants/#{@merchant1.id}"
+      @merchants_data = JSON.parse(response.body, symbolize_names: true)
+      @merchants = @merchants_data[:data]
+
+      expect(@merchants[:id].to_i).to eq(@merchant1.id)
+      expect(@merchants[:attributes][:name]).to eq(@merchant1.name)
     end
   end
 
-  describe "merchant items route" do
+  describe "merchant items path" do
     before :each do
-      @merchant1 = Merchant.create!(name: "Schroeder-Jerde")
-      @item1 = Item.create!(name: "water bottle", description: "holds water", unit_price: 10, merchant_id: @merchant1.id)
-      get "/api/v1/merchants/#{@merchant1.id}/items"
-      @merchants = JSON.parse(response.body)
-      @merch_response = File.read("./spec/fixtures/merchant_items.json")
-      @merch_parse = JSON.parse(@merch_response, symbolize_names: true)
-      @merch_data = @merch_parse[:data]
+      @merchant1 = Merchant.create!(name: "Baggins' Jewelry")
+      @merchant2 = Merchant.create!(name: "Tom's Tools")
+      @merchant3 = Merchant.create!(name: "Bill's Bikes")
+      @item1 = @merchant1.items.create!(name: "gold ring", description: "is precious", unit_price: 111)
+      @item2 = @merchant3.items.create!(name: "water bottle", description: "holds water", unit_price: 10) 
+      @item3 = @merchant3.items.create!(name: "water jug", description: "holds water", unit_price: 10)
     end
 
-    it "shows merchant items from serializer" do
-      expected = {
-        "name": "Item Nemo Facere",
-        "description": "Sunt eum id eius magni consequuntur delectus veritatis. Quisquam laborum illo ut ab. Ducimus in est id voluptas autem.",
-        "unit_price": 42.91,
-        "merchant_id": 1
-      }
-      expect(@merch_data.first[:attributes]).to eq(expected)
+    it "request successful" do
+      get "/api/v1/merchants/#{@merchant3.id}/items"
+      @items_data = JSON.parse(response.body, symbolize_names: true)
+      @items = @items_data[:data]
+
+      expect(response.status).to eq(200)
+      expect(@items).to be_an(Array)
+    end
+    
+    it "shows merchant items" do
+      get "/api/v1/merchants/#{@merchant3.id}/items"
+      @items_data = JSON.parse(response.body, symbolize_names: true)
+      @items = @items_data[:data]
+      @item = @items.first[:attributes]
+
+      @items.each do |item|
+        expect(item[:attributes]).to be_a(Hash)
+        expect(item[:attributes][:name]).to be_a(String)
+        expect(item[:attributes][:description]).to be_a(String)
+        expect(item[:attributes][:unit_price]).to be_a(Float)
+        expect(item[:attributes][:merchant_id]).to eq(@merchant3.id)
+      end
+
+      expect(@item[:name]).to eq(@item2.name)
+      expect(@item[:description]).to eq(@item2.description)
+      expect(@item[:unit_price]).to eq(@item2.unit_price)
+      expect(@item[:merchant_id]).to eq(@merchant3.id)
     end
   end
 end
