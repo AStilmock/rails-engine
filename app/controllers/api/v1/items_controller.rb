@@ -15,10 +15,11 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def update
-    # require 'pry'; binding.pry
     @item = Item.find(params[:id].to_i)
     if @item.update(item_params)
       render json: ItemSerializer.new(@item)
+    else
+      render json: { errors: @item.errors.full_messages }, status: 404
     end
   end
 
