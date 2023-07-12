@@ -73,7 +73,7 @@ RSpec.describe "Item API" do
     end
   end
 
-  describe "one item path" do
+  describe "create item path" do
     before :each do
       @merchant1 = Merchant.create!(name: "Baggins' Jewelry")
       @merchant2 = Merchant.create!(name: "Tom's Tools")
@@ -100,7 +100,7 @@ RSpec.describe "Item API" do
       expect(@item).to be_an(Hash)
     end
 
-    it "creates an item" do
+    it "creates item" do
       @new_item = {
         "name": "water canister",
         "description": "holds water",
@@ -116,6 +116,57 @@ RSpec.describe "Item API" do
       expect(@item[:description]).to eq(@new_item[:description])
       expect(@item[:unit_price]).to eq(@new_item[:unit_price])
       expect(@item[:merchant_id]).to eq(@new_item[:merchant_id].to_i)
+    end
+  end
+
+  describe "edit an item path" do
+    before :each do
+      @merchant1 = Merchant.create!(name: "Baggins' Jewelry")
+      @merchant2 = Merchant.create!(name: "Tom's Tools")
+      @merchant3 = Merchant.create!(name: "Bill's Bikes")
+      @item1 = @merchant1.items.create!(name: "gold ring", description: "is precious", unit_price: 111)
+      @item2 = @merchant3.items.create!(name: "water bottle", description: "holds water", unit_price: 10) 
+      @item3 = @merchant3.items.create!(name: "water jug", description: "holds water", unit_price: 10)
+    end
+
+    it "request successful" do
+      @item_update = {
+        "name": "insulated tumbler",
+        "description": "holds drinks",
+        "unit_price": 200
+      }
+      
+      put "/api/v1/items/#{@item3.id}", params: @item_update
+      @item_update_data = JSON.parse(response.body, symbolize_names: true)
+      @item = @item_update_data[:data][:attributes]
+
+      expect(response.status).to eq(200)
+      expect(response.body).to be_a(String)
+      expect(@item).to be_a(Hash)
+    end
+
+    it "updates item" do
+      expect(@item3.name).to eq("water jug")
+      expect(@item3.description).to eq("holds water")
+      expect(@item3.unit_price).to eq(10)
+
+      @item_update = {
+        "name": "insulated tumbler",
+        "description": "holds drinks",
+        "unit_price": 200
+      }
+      
+      put "/api/v1/items/#{@item3.id}", params: @item_update
+      @item_update_data = JSON.parse(response.body, symbolize_names: true)
+      @item = @item_update_data[:data][:attributes]
+
+      expect(@item[:name]).to_not eq("water jug")
+      expect(@item[:description]).to_not eq("holds water")
+      expect(@item[:unit_price]).to_not eq(10)
+
+      expect(@item[:name]).to eq("insulated tumbler")
+      expect(@item[:description]).to eq("holds drinks")
+      expect(@item[:unit_price]).to eq(200)
     end
   end
 end
