@@ -1,59 +1,121 @@
 require 'rails_helper'
 
 RSpec.describe "Item API" do
-  describe "items API routes" do
-    it "gets all items" do
-      @merchant1 = Merchant.create!(name: "Schroeder-Jerde")
-      @item1 = Item.create!(name: "water bottle", description: "holds water", unit_price: 10, merchant_id: @merchant1.id)
-      @item2 = Item.create!(name: "water jug", description: "holds water", unit_price: 10, merchant_id: @merchant1.id)
-      get "/api/v1/items"
-      @items = JSON.parse(response.body)
-      @item_response = File.read("./spec/fixtures/items_all.json")
-      @item_parse = JSON.parse(@item_response, symbolize_names: true)
-      @item_data = @item_parse[:data]
-
-      expected = {
-        "name": "Item Nemo Facere",
-        "description": "Sunt eum id eius magni consequuntur delectus veritatis. Quisquam laborum illo ut ab. Ducimus in est id voluptas autem.",
-        "unit_price": 42.91,
-        "merchant_id": 1
-      }
-      expect(@item_data.first[:attributes]).to eq(expected)
+  describe "all items path" do
+    before :each do
+      @merchant1 = Merchant.create!(name: "Baggins' Jewelry")
+      @merchant2 = Merchant.create!(name: "Tom's Tools")
+      @merchant3 = Merchant.create!(name: "Bill's Bikes")
+      @item1 = @merchant1.items.create!(name: "gold ring", description: "is precious", unit_price: 111)
+      @item2 = @merchant3.items.create!(name: "water bottle", description: "holds water", unit_price: 10) 
+      @item3 = @merchant3.items.create!(name: "water jug", description: "holds water", unit_price: 10)
     end
 
-    it "shows one item" do
-      @merchant1 = Merchant.create!(name: "Schroeder-Jerde")
-      @item1 = Item.create!(name: "water bottle", description: "holds water", unit_price: 10, merchant_id: @merchant1.id)
-      @item2 = Item.create!(name: "water jug", description: "holds water", unit_price: 10, merchant_id: @merchant1.id)
-      get "/api/v1/items/#{@item1.id}"
-      @items = JSON.parse(response.body)
-      @item_response = File.read("./spec/fixtures/items_show.json")
-      @item_parse = JSON.parse(@item_response, symbolize_names: true)
-      @item_data = @item_parse[:data]
+    it "request successful" do
+      get "/api/v1/items"
+      @items_data = JSON.parse(response.body, symbolize_names: true)
+      @items = @items_data[:data]
 
-      expected = {
-        "name": "Item Nemo Facere",
-        "description": "Sunt eum id eius magni consequuntur delectus veritatis. Quisquam laborum illo ut ab. Ducimus in est id voluptas autem.",
-        "unit_price": 42.91,
-        "merchant_id": 1
+      expect(response.status).to eq(200)
+      expect(response.body).to be_a(String)
+      expect(@items).to be_an(Array)
+
+      @items.each do |item|
+        expect(item[:attributes]).to be_a(Hash)
+        expect(item[:attributes][:name]).to be_a(String)
+        expect(item[:attributes][:description]).to be_a(String)
+        expect(item[:attributes][:unit_price]).to be_a(Float)
+        expect(item[:attributes][:merchant_id]).to be_a(Integer)
+      end
+    end
+
+    it "gets all items" do
+      get "/api/v1/items"
+      @items_data = JSON.parse(response.body, symbolize_names: true)
+      @items = @items_data[:data]
+
+      expect(@items.first[:attributes][:name]).to eq(@item1.name)
+      expect(@items.first[:attributes][:description]).to eq(@item1.description)
+      expect(@items.first[:attributes][:unit_price]).to eq(@item1.unit_price)
+      expect(@items.first[:attributes][:merchant_id]).to eq(@merchant1.id)
+    end
+  end
+
+  describe "one item path" do
+    before :each do
+      @merchant1 = Merchant.create!(name: "Baggins' Jewelry")
+      @merchant2 = Merchant.create!(name: "Tom's Tools")
+      @merchant3 = Merchant.create!(name: "Bill's Bikes")
+      @item1 = @merchant1.items.create!(name: "gold ring", description: "is precious", unit_price: 111)
+      @item2 = @merchant3.items.create!(name: "water bottle", description: "holds water", unit_price: 10) 
+      @item3 = @merchant3.items.create!(name: "water jug", description: "holds water", unit_price: 10)
+    end
+
+    it "request successful" do
+      get "/api/v1/items/#{@item3.id}"
+      @items_data = JSON.parse(response.body, symbolize_names: true)
+      @item = @items_data[:data][:attributes]
+
+      expect(response.status).to eq(200)
+      expect(response.body).to be_a(String)
+      expect(@item).to be_an(Hash)
+    end
+
+    it "gets one item" do
+      get "/api/v1/items/#{@item3.id}"
+      @items_data = JSON.parse(response.body, symbolize_names: true)
+      @item = @items_data[:data][:attributes]
+
+      expect(@item[:name]).to eq(@item3.name)
+      expect(@item[:description]).to eq(@item3.description)
+      expect(@item[:unit_price]).to eq(@item3.unit_price)
+      expect(@item[:merchant_id]).to eq(@merchant3.id)
+    end
+  end
+
+  describe "one item path" do
+    before :each do
+      @merchant1 = Merchant.create!(name: "Baggins' Jewelry")
+      @merchant2 = Merchant.create!(name: "Tom's Tools")
+      @merchant3 = Merchant.create!(name: "Bill's Bikes")
+      @item1 = @merchant1.items.create!(name: "gold ring", description: "is precious", unit_price: 111)
+      @item2 = @merchant3.items.create!(name: "water bottle", description: "holds water", unit_price: 10) 
+      @item3 = @merchant3.items.create!(name: "water jug", description: "holds water", unit_price: 10)
+    end
+
+    it "request successful" do
+      @new_item = {
+        "name": "water canister",
+        "description": "holds water",
+        "unit_price": 100,
+        "merchant_id": "#{@merchant3.id}"
       }
 
-      expect(@item_data[:attributes]).to eq(expected)
+      post "/api/v1/items", params: @new_item
+      @new_item_data = JSON.parse(response.body, symbolize_names: true)
+      @item = @new_item_data[:data][:attributes]
+
+      expect(response.status).to eq(201)
+      expect(response.body).to be_a(String)
+      expect(@item).to be_an(Hash)
     end
 
     it "creates an item" do
-      @merchant1 = Merchant.create!(name: "Schroeder-Jerde")
-      post "/api/v1/items"
-      
-      # @new_items = JSON.parse(response.body)
-      # @new_response = File.read("./spec/fixtures/items_new.json")
-      # @new_parse = JSON.parse(@new_response, symbolize_names: true)
-      # @new_item_data = @item_parse[:data]
+      @new_item = {
+        "name": "water canister",
+        "description": "holds water",
+        "unit_price": 100,
+        "merchant_id": "#{@merchant3.id}"
+      }
 
+      post "/api/v1/items", params: @new_item
+      @new_item_data = JSON.parse(response.body, symbolize_names: true)
+      @item = @new_item_data[:data][:attributes]
 
-        # require 'pry'; binding.pry
-      # expect(@item_data[:attributes].last).to eq(expected)
-
+      expect(@item[:name]).to eq(@new_item[:name])
+      expect(@item[:description]).to eq(@new_item[:description])
+      expect(@item[:unit_price]).to eq(@new_item[:unit_price])
+      expect(@item[:merchant_id]).to eq(@new_item[:merchant_id].to_i)
     end
   end
 end
