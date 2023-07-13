@@ -11,7 +11,21 @@ class Api::V1::ItemsController < ApplicationController
     @item = Item.new(item_params)
     if @item.save
       render json: ItemSerializer.new(@item), status: :created
+    else
+      render json: { errors: @item.errors.full_messages }, status: 400
     end
+    # begin
+    #   render json: MerchantSerializer.new(Merchant.merchant_search(params[:name]).first)
+    # rescue ActiveRecord::InternalServerError => error
+    #   render json: {
+    #     errors: [
+    #       {
+    #         status: "500",
+    #         title: error.message
+    #       }
+    #     ]
+    #   }, status: 500
+    # end
   end
 
   def update
@@ -19,8 +33,20 @@ class Api::V1::ItemsController < ApplicationController
     if @item.update(item_params)
       render json: ItemSerializer.new(@item)
     else
-      render json: { errors: @item.errors.full_messages }, status: 404
+      render json: { errors: @item.errors.full_messages }, status: 400
     end
+    # begin
+    #   render json: MerchantSerializer.new(Merchant.merchant_search(params[:name]).first)
+    # rescue ActiveRecord::InternalServerError => error
+    #   render json: {
+    #     errors: [
+    #       {
+    #         status: "500",
+    #         title: error.message
+    #       }
+    #     ]
+    #   }, status: 500
+    # end
   end
 
   def delete
@@ -28,6 +54,29 @@ class Api::V1::ItemsController < ApplicationController
 
   def destroy
     render json: ItemSerializer.new(Item.destroy(params[:id]))
+  end
+
+  def search
+    render json: ItemSerializer.new(Item.item_search(params[:name]))
+    # @merchant = Merchant.merchant_search(params[:name])
+    # require 'pry'; binding.pry
+    # if @merchant.empty?
+    #   render json: MerchantSerializer.new(@merchant), status: 200
+    # else 
+    #   render json: MerchantSerializer.new(@merchant.first), status: 200
+    # end
+    # begin
+    #   render json: MerchantSerializer.new(Merchant.merchant_search(params[:name]).first)
+    # rescue ActiveRecord::InternalServerError => error
+    #   render json: {
+    #     errors: [
+    #       {
+    #         status: "500",
+    #         title: error.message
+    #       }
+    #     ]
+    #   }, status: 500
+    # end
   end
 
   private

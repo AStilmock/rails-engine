@@ -216,12 +216,43 @@ RSpec.describe "Item API" do
       expect(@data).to be_a(Hash)
     end
 
-    it "returns merchant data" do
+    it "returns merchant data for the item" do
       get "/api/v1/items/#{@item1.id}/merchant"
       @data_parse = JSON.parse(response.body, symbolize_names: true)
       @data = @data_parse[:data][:attributes]
 
       expect(@data[:name]).to eq(@merchant1.name)
+    end
+  end
+
+  describe "item search path" do
+    before :each do
+      @merchant1 = Merchant.create!(name: "Baggins' Jewelry")
+      @merchant2 = Merchant.create!(name: "Tom's Tools")
+      @merchant3 = Merchant.create!(name: "Bill's Bikes")
+      @item1 = @merchant1.items.create!(name: "gold ring", description: "is precious", unit_price: 111)
+      @item2 = @merchant3.items.create!(name: "water bottle", description: "holds water", unit_price: 10) 
+      @item3 = @merchant3.items.create!(name: "water jug", description: "holds water", unit_price: 10)
+    end
+
+    it "request successful" do
+      get "/api/v1/items/find_all?name=atEr"
+      @search_data = JSON.parse(response.body, symbolize_names: true)
+      @search = @search_data[:data]
+
+      expect(response.status).to eq(200)
+      expect(response.body).to be_a(String)
+      expect(@search).to be_a(Array)
+    end
+    
+    it "shows merchant items" do
+      get "/api/v1/items/find_all?name=atEr"
+      @search_data = JSON.parse(response.body, symbolize_names: true)
+      @search = @search_data[:data]
+
+      expect(@search.count).to eq(2)
+      expect(@search.first[:attributes][:name]).to eq(@item2.name)
+      expect(@search.second[:attributes][:name]).to eq(@item3.name)
     end
   end
 end
