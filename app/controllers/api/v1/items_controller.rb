@@ -5,12 +5,6 @@ class Api::V1::ItemsController < ApplicationController
 
   def show
     render json: ItemSerializer.new(Item.find(params[:id]))
-    # @item = Item.find(params[:id])
-    # if @item.id.nil?
-    #   render json: { errors: @item.errors.full_messages }, status: 400
-    # else
-    #   render json: ItemSerializer.new(Item.find(params[:id]))
-    # end
   end
 
   def create
@@ -20,18 +14,6 @@ class Api::V1::ItemsController < ApplicationController
     else
       render json: { errors: @item.errors.full_messages }, status: 400
     end
-    # begin
-    #   render json: MerchantSerializer.new(Merchant.merchant_search(params[:name]).first)
-    # rescue ActiveRecord::InternalServerError => error
-    #   render json: {
-    #     errors: [
-    #       {
-    #         status: "500",
-    #         title: error.message
-    #       }
-    #     ]
-    #   }, status: 500
-    # end
   end
 
   def update
@@ -41,18 +23,6 @@ class Api::V1::ItemsController < ApplicationController
     else
       render json: { errors: @item.errors.full_messages }, status: 400
     end
-    # begin
-    #   render json: MerchantSerializer.new(Merchant.merchant_search(params[:name]).first)
-    # rescue ActiveRecord::InternalServerError => error
-    #   render json: {
-    #     errors: [
-    #       {
-    #         status: "500",
-    #         title: error.message
-    #       }
-    #     ]
-    #   }, status: 500
-    # end
   end
 
   def delete
@@ -72,25 +42,6 @@ class Api::V1::ItemsController < ApplicationController
     elsif params[:min_price].nil? && params[:max_price].present?
       render json: ItemSerializer.new(Item.max_price_search(params[:max_price]))
     end
-    # params[:name].present? && (params[:min_price].present? || params[:max_price].present? || params[:price].present?)
-    # @merchant = Merchant.merchant_search(params[:name])
-    # if @merchant.empty?
-    #   render json: MerchantSerializer.new(@merchant), status: 200
-    # else 
-    #   render json: MerchantSerializer.new(@merchant.first), status: 200
-    # end
-    # begin
-    #   render json: MerchantSerializer.new(Merchant.merchant_search(params[:name]).first)
-    # rescue ActiveRecord::InternalServerError => error
-    #   render json: {
-    #     errors: [
-    #       {
-    #         status: "500",
-    #         title: error.message
-    #       }
-    #     ]
-    #   }, status: 500
-    # end
   end
 
   private
