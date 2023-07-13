@@ -62,7 +62,7 @@ RSpec.describe "Merchant API" do
       expect(@merchants[:attributes][:name]).to eq(@merchant1.name)
     end
 
-    xit "has error with bad id" do
+    it "has error with bad id" do
       get "/api/v1/merchants/99999999999"
 
       expect(response.status).to eq(404)
@@ -86,6 +86,18 @@ RSpec.describe "Merchant API" do
 
       expect(response.status).to eq(200)
       expect(@items).to be_an(Array)
+      @items.each do |item|
+        expect(item[:attributes]).to be_a(Hash)
+        expect(item[:attributes][:name]).to be_a(String)
+        expect(item[:attributes][:description]).to be_a(String)
+        expect(item[:attributes][:unit_price]).to be_a(Float)
+        expect(item[:attributes][:merchant_id]).to eq(@merchant3.id)
+      end
+    end
+
+    it "request unsuccessful with bad id" do
+      get "/api/v1/merchants/999999999/items"
+      expect(response.status).to eq(404)
     end
     
     it "shows merchant items" do
@@ -94,13 +106,6 @@ RSpec.describe "Merchant API" do
       @items = @items_data[:data]
       @item = @items.first[:attributes]
 
-      @items.each do |item|
-        expect(item[:attributes]).to be_a(Hash)
-        expect(item[:attributes][:name]).to be_a(String)
-        expect(item[:attributes][:description]).to be_a(String)
-        expect(item[:attributes][:unit_price]).to be_a(Float)
-        expect(item[:attributes][:merchant_id]).to eq(@merchant3.id)
-      end
 
       expect(@item[:name]).to eq(@item2.name)
       expect(@item[:description]).to eq(@item2.description)
@@ -124,7 +129,7 @@ RSpec.describe "Merchant API" do
 
       @search_data = JSON.parse(response.body, symbolize_names: true)
       @search = @search_data[:data]
-      @merchant_name = @search.first[:attributes]
+      @merchant_name = @search[:attributes]
 
       expect(response.status).to eq(200)
       expect(response.body).to be_a(String)
@@ -136,7 +141,7 @@ RSpec.describe "Merchant API" do
 
       @search_data = JSON.parse(response.body, symbolize_names: true)
       @search = @search_data[:data]
-      @merchant_name = @search.first[:attributes]
+      @merchant_name = @search[:attributes]
 
       expect(@merchant_name[:name]).to eq(@merchant3.name)
     end
