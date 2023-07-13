@@ -64,7 +64,6 @@ RSpec.describe "Merchant API" do
 
     it "has error with bad id" do
       get "/api/v1/merchants/99999999999"
-
       expect(response.status).to eq(404)
     end
   end
@@ -134,6 +133,11 @@ RSpec.describe "Merchant API" do
       expect(response.status).to eq(200)
       expect(response.body).to be_a(String)
       expect(@merchant_name).to be_a(Hash)
+    end
+
+    it "request not successful" do
+      get "/api/v1/merchants/find?name=AAAAAAAAAAAA"
+      expect(response.status).to eq(404)
     end
     
     it "shows merchant items" do

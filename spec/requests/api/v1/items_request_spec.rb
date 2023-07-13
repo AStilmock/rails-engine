@@ -100,6 +100,18 @@ RSpec.describe "Item API" do
       expect(@item).to be_an(Hash)
     end
 
+    it "request unsuccessful" do
+      @new_item = {
+        "name": nil,
+        "description": nil,
+        "unit_price": 100,
+        "merchant_id": "#{@merchant3.id}"
+      }
+
+      post "/api/v1/items", params: @new_item
+      expect(response.status).to eq(400)
+    end
+
     it "creates item" do
       @new_item = {
         "name": "water canister",
@@ -143,6 +155,17 @@ RSpec.describe "Item API" do
       expect(response.status).to eq(200)
       expect(response.body).to be_a(String)
       expect(@item).to be_a(Hash)
+    end
+
+    it "request not successful" do
+      @item_update = {
+        "name": "insulated tumbler",
+        "description": "holds drinks",
+        "unit_price": "not_a_number"
+      }
+
+      put "/api/v1/items/#{@item3.id}", params: @item_update
+      expect(response.status).to eq(400)
     end
 
     it "updates item" do
