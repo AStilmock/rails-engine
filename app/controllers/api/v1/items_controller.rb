@@ -63,7 +63,6 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def search
-    # require 'pry'; binding.pry
     if params[:name].present?
       render json: ItemSerializer.new(Item.item_search(params[:name]))
     elsif params[:min_price].present? && params[:max_price].present?
@@ -75,7 +74,6 @@ class Api::V1::ItemsController < ApplicationController
     end
     # params[:name].present? && (params[:min_price].present? || params[:max_price].present? || params[:price].present?)
     # @merchant = Merchant.merchant_search(params[:name])
-    # require 'pry'; binding.pry
     # if @merchant.empty?
     #   render json: MerchantSerializer.new(@merchant), status: 200
     # else 

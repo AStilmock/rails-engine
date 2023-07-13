@@ -8,9 +8,8 @@ class Api::V1::MerchantsController < ApplicationController
   end
 
   def search
-    render json: MerchantSerializer.new(Merchant.merchant_search(params[:name]).first)
+    render json: MerchantSerializer.new(Merchant.merchant_search(params[:name]))
     # @merchant = Merchant.merchant_search(params[:name])
-    # require 'pry'; binding.pry
     # if @merchant.empty?
     #   render json: MerchantSerializer.new(@merchant), status: 200
     # else 
