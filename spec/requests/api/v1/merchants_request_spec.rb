@@ -61,6 +61,13 @@ RSpec.describe "Merchant API" do
       expect(@merchants[:id].to_i).to eq(@merchant1.id)
       expect(@merchants[:attributes][:name]).to eq(@merchant1.name)
     end
+
+    xit "has error with bad id" do
+      get "/api/v1/merchants/99999999999"
+
+      expect(response.status).to eq(404)
+      require 'pry'; binding.pry
+    end
   end
 
   describe "merchant items path" do

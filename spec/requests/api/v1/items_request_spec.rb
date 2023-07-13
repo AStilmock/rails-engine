@@ -232,7 +232,7 @@ RSpec.describe "Item API" do
       @merchant3 = Merchant.create!(name: "Bill's Bikes")
       @item1 = @merchant1.items.create!(name: "gold ring", description: "is precious", unit_price: 111)
       @item2 = @merchant3.items.create!(name: "water bottle", description: "holds water", unit_price: 10) 
-      @item3 = @merchant3.items.create!(name: "water jug", description: "holds water", unit_price: 10)
+      @item3 = @merchant3.items.create!(name: "water jug", description: "holds water", unit_price: 50)
     end
 
     it "request successful" do
@@ -245,7 +245,7 @@ RSpec.describe "Item API" do
       expect(@search).to be_a(Array)
     end
     
-    it "shows merchant items" do
+    it "shows items from name search" do
       get "/api/v1/items/find_all?name=atEr"
       @search_data = JSON.parse(response.body, symbolize_names: true)
       @search = @search_data[:data]
@@ -253,6 +253,35 @@ RSpec.describe "Item API" do
       expect(@search.count).to eq(2)
       expect(@search.first[:attributes][:name]).to eq(@item2.name)
       expect(@search.second[:attributes][:name]).to eq(@item3.name)
+    end
+
+    it "shows items from min_price search" do
+      get "/api/v1/items/find_all?min_price=20"
+      @search_data = JSON.parse(response.body, symbolize_names: true)
+      @search = @search_data[:data]
+
+      expect(@search.count).to eq(2)
+      expect(@search.first[:attributes][:name]).to eq(@item3.name)
+      expect(@search.second[:attributes][:name]).to eq(@item1.name)
+    end
+
+    it "shows items from max_price search" do
+      get "/api/v1/items/find_all?max_price=90"
+      @search_data = JSON.parse(response.body, symbolize_names: true)
+      @search = @search_data[:data]
+
+      expect(@search.count).to eq(2)
+      expect(@search.first[:attributes][:name]).to eq(@item2.name)
+      expect(@search.second[:attributes][:name]).to eq(@item3.name)
+    end
+
+    it "shows items from min_max_price search" do
+      get "/api/v1/items/find_all?min_price=20&max_price=90"
+      @search_data = JSON.parse(response.body, symbolize_names: true)
+      @search = @search_data[:data]
+
+      expect(@search.count).to eq(1)
+      expect(@search.first[:attributes][:name]).to eq(@item3.name)
     end
   end
 end
