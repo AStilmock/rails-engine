@@ -102,4 +102,37 @@ RSpec.describe "Merchant API" do
       expect(@item[:merchant_id]).to eq(@merchant3.id)
     end
   end
+
+  describe "merchant search path" do
+    before :each do
+      @merchant1 = Merchant.create!(name: "Baggins' Jewelry")
+      @merchant2 = Merchant.create!(name: "Tom's Tools")
+      @merchant3 = Merchant.create!(name: "Bill's Bikes")
+      @item1 = @merchant1.items.create!(name: "gold ring", description: "is precious", unit_price: 111)
+      @item2 = @merchant3.items.create!(name: "water bottle", description: "holds water", unit_price: 10) 
+      @item3 = @merchant3.items.create!(name: "water jug", description: "holds water", unit_price: 10)
+    end
+
+    it "request successful" do
+      get "/api/v1/merchants/find?name=iLl"
+
+      @search_data = JSON.parse(response.body, symbolize_names: true)
+      @search = @search_data[:data]
+      @merchant_name = @search[:attributes]
+
+      expect(response.status).to eq(200)
+      expect(response.body).to be_a(String)
+      expect(@merchant_name).to be_a(Hash)
+    end
+    
+    it "shows merchant items" do
+      get "/api/v1/merchants/find?name=iLl"
+
+      @search_data = JSON.parse(response.body, symbolize_names: true)
+      @search = @search_data[:data]
+      @merchant_name = @search[:attributes][:name]
+
+      expect(@merchant_name).to eq(@merchant3.name)
+    end
+  end
 end
