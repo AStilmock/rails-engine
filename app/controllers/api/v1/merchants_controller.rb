@@ -4,11 +4,20 @@ class Api::V1::MerchantsController < ApplicationController
   end
 
   def show
-    render json: MerchantSerializer.new(Merchant.find(params[:id]))
-  end
+    # require 'pry'; binding.pry
+    if Merchant.find_by_id(params[:id]).nil?
+      render json: { errors: "Merchant ID must be an integer" }, status: 404
+    else
+      render json: MerchantSerializer.new(Merchant.find(params[:id]))
+    end  end
 
   def search
-    render json: MerchantSerializer.new(Merchant.merchant_search(params[:name]))
+    @merchant = Merchant.merchant_search(params[:name])
+    if @merchant.empty?
+      render json: { errors: "Merchant ID must be an integer" }, status: 500
+    else
+      render json: MerchantSerializer.new(@merchant.first)
+    end
     # @merchant = Merchant.merchant_search(params[:name])
     # if @merchant.empty?
     #   render json: MerchantSerializer.new(@merchant), status: 200

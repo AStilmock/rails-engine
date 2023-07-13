@@ -16,7 +16,7 @@ class Api::V1::ItemsController < ApplicationController
   def create
     @item = Item.new(item_params)
     if @item.save
-      render json: ItemSerializer.new(@item), status: :created
+      render json: ItemSerializer.new(@item), status: 201
     else
       render json: { errors: @item.errors.full_messages }, status: 400
     end

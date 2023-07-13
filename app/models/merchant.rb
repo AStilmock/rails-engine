@@ -8,6 +8,8 @@ class Merchant < ApplicationRecord
   has_many :transactions, through: :invoices
 
   def self.merchant_search(name)
-    where("name ILIKE ?", "%#{name}%").order(:name)
+    where("name ILIKE ?", "%#{name}%")
+    .order(:name)
+    .limit(1)
   end
 end
