@@ -66,7 +66,6 @@ RSpec.describe "Merchant API" do
       get "/api/v1/merchants/99999999999"
 
       expect(response.status).to eq(404)
-      require 'pry'; binding.pry
     end
   end
 
@@ -125,7 +124,7 @@ RSpec.describe "Merchant API" do
 
       @search_data = JSON.parse(response.body, symbolize_names: true)
       @search = @search_data[:data]
-      @merchant_name = @search[:attributes]
+      @merchant_name = @search.first[:attributes]
 
       expect(response.status).to eq(200)
       expect(response.body).to be_a(String)
@@ -137,9 +136,9 @@ RSpec.describe "Merchant API" do
 
       @search_data = JSON.parse(response.body, symbolize_names: true)
       @search = @search_data[:data]
-      @merchant_name = @search[:attributes][:name]
+      @merchant_name = @search.first[:attributes]
 
-      expect(@merchant_name).to eq(@merchant3.name)
+      expect(@merchant_name[:name]).to eq(@merchant3.name)
     end
   end
 end
