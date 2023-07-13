@@ -5,6 +5,12 @@ class Api::V1::ItemsController < ApplicationController
 
   def show
     render json: ItemSerializer.new(Item.find(params[:id]))
+    # @item = Item.find(params[:id])
+    # if @item.id.nil?
+    #   render json: { errors: @item.errors.full_messages }, status: 400
+    # else
+    #   render json: ItemSerializer.new(Item.find(params[:id]))
+    # end
   end
 
   def create
@@ -57,7 +63,17 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def search
-    render json: ItemSerializer.new(Item.item_search(params[:name]))
+    # require 'pry'; binding.pry
+    if params[:name].present?
+      render json: ItemSerializer.new(Item.item_search(params[:name]))
+    elsif params[:min_price].present? && params[:max_price].present?
+      render json: ItemSerializer.new(Item.price_search(params[:min_price], params[:max_price]))
+    elsif params[:min_price].present? && params[:max_price].nil?
+      render json: ItemSerializer.new(Item.min_price_search(params[:min_price]))
+    elsif params[:min_price].nil? && params[:max_price].present?
+      render json: ItemSerializer.new(Item.max_price_search(params[:max_price]))
+    end
+    # params[:name].present? && (params[:min_price].present? || params[:max_price].present? || params[:price].present?)
     # @merchant = Merchant.merchant_search(params[:name])
     # require 'pry'; binding.pry
     # if @merchant.empty?
