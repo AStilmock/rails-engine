@@ -7,4 +7,12 @@ class Item < ApplicationRecord
   belongs_to :merchant
   has_many :invoice_items, dependent: :destroy
   has_many :invoices, through: :invoice_items
+
+  def self.item_search(name)
+    where("name ILIKE ?", "%#{name}%").order(:name)
+  end
+
+  # def self.item_search(price)
+  #   where("unit_price = ?", "#{price}").order(:name)
+  # end
 end

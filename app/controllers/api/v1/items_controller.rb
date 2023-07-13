@@ -56,6 +56,29 @@ class Api::V1::ItemsController < ApplicationController
     render json: ItemSerializer.new(Item.destroy(params[:id]))
   end
 
+  def search
+    render json: ItemSerializer.new(Item.item_search(params[:name]))
+    # @merchant = Merchant.merchant_search(params[:name])
+    # require 'pry'; binding.pry
+    # if @merchant.empty?
+    #   render json: MerchantSerializer.new(@merchant), status: 200
+    # else 
+    #   render json: MerchantSerializer.new(@merchant.first), status: 200
+    # end
+    # begin
+    #   render json: MerchantSerializer.new(Merchant.merchant_search(params[:name]).first)
+    # rescue ActiveRecord::InternalServerError => error
+    #   render json: {
+    #     errors: [
+    #       {
+    #         status: "500",
+    #         title: error.message
+    #       }
+    #     ]
+    #   }, status: 500
+    # end
+  end
+
   private
 
   def item_params
