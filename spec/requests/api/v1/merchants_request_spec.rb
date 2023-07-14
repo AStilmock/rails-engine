@@ -125,7 +125,6 @@ RSpec.describe "Merchant API" do
 
     it "request successful" do
       get "/api/v1/merchants/find?name=iLl"
-
       @search_data = JSON.parse(response.body, symbolize_names: true)
       @search = @search_data[:data]
       @merchant_name = @search[:attributes]
@@ -135,14 +134,18 @@ RSpec.describe "Merchant API" do
       expect(@merchant_name).to be_a(Hash)
     end
 
-    it "request not successful" do
+    it "request with bad id" do
       get "/api/v1/merchants/find?name=AAAAAAAAAAAA"
-      expect(response.status).to eq(404)
+      @search_data = JSON.parse(response.body, symbolize_names: true)
+      @search = @search_data[:data]
+
+      expect(response.status).to eq(200)
+      expect(@search).to be_a(Hash)
+      expect(@search[:id]).to eq(nil)
     end
     
     it "shows merchant items" do
       get "/api/v1/merchants/find?name=iLl"
-
       @search_data = JSON.parse(response.body, symbolize_names: true)
       @search = @search_data[:data]
       @merchant_name = @search[:attributes]

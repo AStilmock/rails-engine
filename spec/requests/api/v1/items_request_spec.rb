@@ -306,5 +306,21 @@ RSpec.describe "Item API" do
       expect(@search.count).to eq(1)
       expect(@search.first[:attributes][:name]).to eq(@item3.name)
     end
+
+    it "cannot send name and price" do
+      get "/api/v1/items/find_all?min_price=20&name=atEr"
+      expect(response.status).to eq(400)
+
+      get "/api/v1/items/find_all?max_price=90&name=atEr"
+      expect(response.status).to eq(400)
+    end
+
+    it "cannot send min_price or max_price less than 0" do
+      get "/api/v1/items/find_all?min_price=-20"
+      expect(response.status).to eq(400)
+
+      get "/api/v1/items/find_all?max_price=-20"
+      expect(response.status).to eq(400)
+    end
   end
 end
