@@ -61,6 +61,11 @@ RSpec.describe "Merchant API" do
       expect(@merchants[:id].to_i).to eq(@merchant1.id)
       expect(@merchants[:attributes][:name]).to eq(@merchant1.name)
     end
+
+    it "has error with bad id" do
+      get "/api/v1/merchants/99999999999"
+      expect(response.status).to eq(404)
+    end
   end
 
   describe "merchant items path" do
@@ -80,6 +85,18 @@ RSpec.describe "Merchant API" do
 
       expect(response.status).to eq(200)
       expect(@items).to be_an(Array)
+      @items.each do |item|
+        expect(item[:attributes]).to be_a(Hash)
+        expect(item[:attributes][:name]).to be_a(String)
+        expect(item[:attributes][:description]).to be_a(String)
+        expect(item[:attributes][:unit_price]).to be_a(Float)
+        expect(item[:attributes][:merchant_id]).to eq(@merchant3.id)
+      end
+    end
+
+    it "request unsuccessful with bad id" do
+      get "/api/v1/merchants/999999999/items"
+      expect(response.status).to eq(404)
     end
     
     it "shows merchant items" do
@@ -88,13 +105,6 @@ RSpec.describe "Merchant API" do
       @items = @items_data[:data]
       @item = @items.first[:attributes]
 
-      @items.each do |item|
-        expect(item[:attributes]).to be_a(Hash)
-        expect(item[:attributes][:name]).to be_a(String)
-        expect(item[:attributes][:description]).to be_a(String)
-        expect(item[:attributes][:unit_price]).to be_a(Float)
-        expect(item[:attributes][:merchant_id]).to eq(@merchant3.id)
-      end
 
       expect(@item[:name]).to eq(@item2.name)
       expect(@item[:description]).to eq(@item2.description)
@@ -115,7 +125,6 @@ RSpec.describe "Merchant API" do
 
     it "request successful" do
       get "/api/v1/merchants/find?name=iLl"
-
       @search_data = JSON.parse(response.body, symbolize_names: true)
       @search = @search_data[:data]
       @merchant_name = @search[:attributes]
@@ -124,15 +133,24 @@ RSpec.describe "Merchant API" do
       expect(response.body).to be_a(String)
       expect(@merchant_name).to be_a(Hash)
     end
+
+    it "request with bad id" do
+      get "/api/v1/merchants/find?name=AAAAAAAAAAAA"
+      @search_data = JSON.parse(response.body, symbolize_names: true)
+      @search = @search_data[:data]
+
+      expect(response.status).to eq(200)
+      expect(@search).to be_a(Hash)
+      expect(@search[:id]).to eq(nil)
+    end
     
     it "shows merchant items" do
       get "/api/v1/merchants/find?name=iLl"
-
       @search_data = JSON.parse(response.body, symbolize_names: true)
       @search = @search_data[:data]
-      @merchant_name = @search[:attributes][:name]
+      @merchant_name = @search[:attributes]
 
-      expect(@merchant_name).to eq(@merchant3.name)
+      expect(@merchant_name[:name]).to eq(@merchant3.name)
     end
   end
 end
