@@ -61,6 +61,16 @@ RSpec.describe "Item API" do
       expect(@item).to be_an(Hash)
     end
 
+    it "has error with bad id" do
+      get "/api/v1/items/99999999999"
+      expect(response.status).to eq(404)
+    end
+
+    it "second bad id" do
+      get "/api/v1/items/not_an_id"
+      expect(response.status).to eq(404)
+    end
+
     it "gets one item" do
       get "/api/v1/items/#{@item3.id}"
       @items_data = JSON.parse(response.body, symbolize_names: true)

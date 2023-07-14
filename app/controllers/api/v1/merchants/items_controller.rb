@@ -1,4 +1,4 @@
-class Api::V1::MerchantItemsController < ApplicationController
+class Api::V1::Merchants::ItemsController < ApplicationController
   def index
     if Merchant.find_by_id(params[:merchant_id]).nil?
       render json: { errors: "Merchant ID must be an integer" }, status: 404
